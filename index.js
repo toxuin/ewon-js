@@ -26,7 +26,7 @@ Talk2M.prototype.getAccountInfo = function(callback) {
 };
 
 Talk2M.prototype.getEwons = function(callback) {
-    requestify.post(buildUrl("getewon"))
+    requestify.post(buildUrl("getewons"))
         .then(function(response) {
             callback(null, JSON.parse(response.body));
         })
