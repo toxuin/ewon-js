@@ -13,6 +13,8 @@ var Talk2M = function(cred) {
 };
 
 var serverURL = "https://m2web.talk2m.com/t2mapi";
+var dataMailboxURL = "https://data.talk2m.com";
+
 var credentials;
 
 Talk2M.prototype.getAccountInfo = function(callback) {
@@ -70,8 +72,28 @@ Talk2M.prototype.writeTag = function(ewon, tagName, tagValue, callback) {
         });
 };
 
-function buildUrl(action, params) {
-	var result = serverURL + "/" + action + "?t2mdeveloperid=" + credentials.t2mdeveloperid 
+// PARAMS CAN BE LIKE THIS: {tagId, from, to, limit}
+Talk2M.prototype.getDMData = function(ewon, params, callback) {
+    if (!ewon || !ewon.id) return callback(new Error("eWon not specified!"));
+    // ewonId, tagId, from, to, Limit
+    var paramString = "ewonId=" + ewon.id;
+    if (params && params.tagId) paramString += "&tagId=" + params.tagId;
+    if (params && params.from) paramString += "&from=" + params.from;
+    if (params && params.to) paramString += "&to=" + params.to;
+    if (params && params.limit) paramString += "&limit=" + params.limit;
+    requestify.post(buildUrl('getdata', paramString, true))
+        .then(function(response) {
+            callback(null, response.body);
+        })
+        .fail(function(response) {
+            callback(response.body);
+        });
+}
+
+function buildUrl(action, params, isDM) {
+	var result = (isDM ? dataMailboxURL : serverURL) + "/" + action
+                    + (isDM ? "?t2mdevid=" : "?t2mdeveloperid=")
+                    + credentials.t2mdeveloperid 
                     + "&t2maccount=" + credentials.t2maccount 
                     + "&t2musername=" + credentials.t2musername 
                     + "&t2mpassword=" + credentials.t2mpassword;
